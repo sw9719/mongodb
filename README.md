@@ -4,7 +4,7 @@
 [MongoDB](https://github.com/mongodb/mongo) is a No-SQL database that can be used to store and query unstructured data at very high speeds. For redundancy and high availability the database can be configured with replication
 This projects aims at deploying MongoDB statefulset on Kubernetes with replication and authentication enabled. It uses dynamic storageClass for statefulsets. 
 The [NFS](https://github.com/kubernetes-csi/csi-driver-nfs) csi provisioner provides a quick method for setting up dynamic provisioning for the setup.
-In this setup, a cronjob is deployed which will take periodic backups of the MongoDB server.
+In this MongoDB setup, a cronjob is also deployed which will take periodic backups of the MongoDB server and saves the backup on persistent storage
 
 ## Requirements
 
