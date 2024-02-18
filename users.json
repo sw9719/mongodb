@@ -1,0 +1,22 @@
+[
+	{
+		"user": "robert","pwd": "test",
+		"roles":[
+			{"role": "readWrite", "db":"testdb1"},
+			{"role": "read", "db": "testdb2"}],
+		"passwordDigestor":"server"},
+	{
+                "user": "kube","pwd": "mykube",
+                "roles":[{"role": "readWrite", "db":"testdb1"}],
+                "passwordDigestor":"server"},
+	{
+                "user": "openshift","pwd": "ocp",
+                "roles":[
+                        {"role": "readWrite", "db":"testdb1"},
+                        {"role": "readWrite", "db": "testdb2"}],
+                "passwordDigestor":"server"},
+	{
+                "user": "backup","pwd": "backup",
+                "roles":["backup", "restore"],
+                "passwordDigestor":"server"}
+]

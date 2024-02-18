@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongobackup
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mongobackup
+            image: mongo
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - mongodump --host ${MONGOHOST} -u ${USER} -p ${PASS} --out=/var/mongodump/backup_`date "+%Y-%m-%d-%H:%M:%S"` 
+            volumeMounts:
+            - name: backup
+              mountPath: /var/mongodump
+            env:
+            - name: USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongoadmin
+                  key: BACKUPUSER
+            - name: PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongoadmin
+                  key: BACKUPPASS
+            - name: SVC
+              value: mongo
+            - name: MONGOHOST
+              value: "mongodb-0.mongo:27017"
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: backup

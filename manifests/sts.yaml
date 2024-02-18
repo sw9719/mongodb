@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: mongodb
+  serviceName: "mongo"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      terminationGracePeriodSeconds: 10
+      initContainers:  
+      # This is needed to set permission on keyfile properly. For detailed explanation see the Readme.md
+      - name: set-perms
+        image: alpine:3.6
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+        command: ["/bin/sh","-c","cp /keys/* /mykeys/ && chown -R 999:999 /mykeys && chmod 400 /mykeys/key"]
+        volumeMounts:
+        - name: keys
+          mountPath: /keys/key
+          subPath: key
+        - name: mykeys
+          mountPath: /mykeys/
+      containers:
+      - name: mongodb
+        image: mongo
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+        # this will initiate replication between the pods
+          postStart:
+            exec:
+              command: ["/bin/sh","-c","sleep 10s && mongosh -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD} /tmp/initscripts/init.js "]
+        args: ["--replSet","rs0","--keyFile","/mykeys/key","-vvv","--auth"]
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        - name: mykeys
+          mountPath: /mykeys
+        - name: config
+          mountPath: /etc/mongod.conf
+          subPath: mongod.conf
+        - name: repinit
+          mountPath: /tmp/initscripts/
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongoadmin
+                key: MONGO_INITDB_ROOT_USERNAME
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongoadmin
+                key: MONGO_INITDB_ROOT_PASSWORD
+          - name: SVC
+            value: mongo
+      volumes:
+      - name: mykeys
+        persistentVolumeClaim:
+          claimName: key-volume 
+      - name: init-scripts
+        configMap:
+          name: dbfiles
+      - name: keys
+        secret:
+          secretName: dbkey
+          defaultMode: 0777 #mode here doesn't matter as proper perms are set in initContainer itself
+      - name: config
+        configMap:
+          name: dbconfig
+      - name: repinit
+        configMap:
+           name: repinit
+                
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-data
+    spec:
+      accessModes: ["ReadWriteMany"]
+      storageClassName: nfs-csi
+      resources:
+        requests:
+          storage: 5Gi
