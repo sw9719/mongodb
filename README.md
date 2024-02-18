@@ -32,7 +32,7 @@ The *.js scripts initialize the database by adding dummy data and initiating rep
 
 ## Miscellaneous
 
-MongoDB uses keyfile for replication with authentication. This files needs to have 400 permission and owner mongodb. This is not possible through Kubernetes[1](https://stackoverflow.com/questions/49945437/changing-default-file-owner-and-group-owner-of-kubernetes-secrets-files-mounted)[2](github.com/kubernetes/kubernetes/issues/81089)configmap/secrets.
+MongoDB uses keyfile for replication with authentication. This files needs to have 400 permission and owner mongodb. This is not possible through Kubernetes[1](https://stackoverflow.com/questions/49945437/changing-default-file-owner-and-group-owner-of-kubernetes-secrets-files-mounted) [2](github.com/kubernetes/kubernetes/issues/81089) configmap/secrets.
 As a workaround, the key is copied to a Persistent Volume and and required permissions are set using an initcontainer
 
 
