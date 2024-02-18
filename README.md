@@ -20,6 +20,8 @@ chmod +x deploy-cron.sh
 ./deploy-mongo-sh
 ./deploy-cron.sh
 ```
+Note that the pods may take a minute or two to come up and may restart a couple of times during the process.
+
 
 ## Configuring authentication
 
@@ -28,7 +30,7 @@ and their roles which can be changed.
 
 ## Database Initialization
 
-The *.js scripts initialize the database by adding dummy data and initiating replication. Edit the init2.js for configuring initialization.
+The *.js scripts initialize the database by adding dummy data and initiating replication. Edit the init2.js for configuring initialization. They se db1.json and db2.json which contain sample data generated through a pythons script(not included).
 
 ## Miscellaneous
 
